@@ -1,4 +1,5 @@
 import re
+import urllib.parse
 import streamlit as st
 
 st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
@@ -10,13 +11,12 @@ st.info(
     "Type in a search term, and it will return descriptions and links to the relevant Facebook posts."
 )
 
-# 1. Parse master_archive.txt cleanly into [Title, URL] pairs
+# 1. Parse master_archive.txt into [Title, URL] pairs
 records = []
 try:
     with open("master_archive.txt", "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Split by blank lines to isolate entries cleanly
     blocks = re.split(r'\n\s*\n', content)
 
     for block in blocks:
@@ -32,7 +32,6 @@ try:
                 match = re.search(r'(https?://\S+)', line)
                 url = match.group(1) if match else line
             elif title is None:
-                # First non-URL line in the block is always the primary headline
                 title = line
 
         if url and title:
@@ -44,9 +43,8 @@ except FileNotFoundError:
 # 2. Search Bar
 query = st.text_input("Enter a search term (e.g., 'rooflight', 'fridge gas', 'split charge'):")
 
-# 3. Search & Display Results
+# 3. Match and Render
 if query:
-    # Treat 'roof light' and 'rooflight' identically
     norm_query = query.lower().replace("roof light", "rooflight")
     terms = norm_query.split()
 
@@ -59,12 +57,22 @@ if query:
     if matches:
         st.markdown(f"### Found {len(matches)} result(s):")
         for title, url in matches:
-            clean_url = (
-                url.replace("www.facebook.com", "m.facebook.com")
-                   .replace("/posts/", "/permalink/")
-            )
             st.markdown(f"**{title}**")
-            st.markdown(f"[👉 Open Facebook Post]({clean_url})")
+
+            # Check if it is a Facebook link or an external link (Google Drive / Blog / Web)
+            if "facebook.com" in url:
+                encoded_url = urllib.parse.quote(url, safe="")
+                fb_app_url = f"fb://facewebmodal/f?href={encoded_url}"
+                clean_web_url = url.replace("www.facebook.com", "m.facebook.com")
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(f"[📱 **Open in Facebook App**]({fb_app_url})")
+                with col2:
+                    st.markdown(f"[🌐 **Open in Browser**]({clean_web_url})")
+            else:
+                st.markdown(f"[👉 **Open Link**]({url})")
+
             st.divider()
     else:
         st.warning("No matches found for that term. Try a broader keyword.")
