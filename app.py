@@ -1,5 +1,4 @@
 import re
-import urllib.parse
 import streamlit as st
 
 st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
@@ -7,8 +6,8 @@ st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
 st.title("Classic Hymer Technical Archive Search")
 
 st.info(
-    "Search the Classic Hymers Technical Facebook Group index by keyword. "
-    "Type a search term below to find specific guides and discussions."
+    "Search the Classic Hymers Technical Facebook Group archive.\n\n"
+    "📱 *Tip:* Open this page in Safari or Chrome for seamless post links."
 )
 
 # 1. Parse master_archive.txt into [Title, URL] pairs
@@ -60,25 +59,17 @@ if query:
             st.markdown(f"**{title}**")
 
             if "facebook.com" in url:
-                # 1. Direct clean URL
-                clean_url = url.replace("m.facebook.com", "www.facebook.com")
-                
-                # 2. Fallback Group Search URL (100% reliable on iOS inside Facebook app)
-                # Encodes the exact post title to search within group 297054424534823
-                encoded_search = urllib.parse.quote(title)
-                search_fallback_url = f"https://www.facebook.com/groups/297054424534823/search/?q={encoded_search}"
-
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown(
-                        f'<a href="{clean_url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Post</b></a>',
-                        unsafe_allow_html=True,
-                    )
-                with col2:
-                    st.markdown(
-                        f'<a href="{search_fallback_url}" target="_blank" rel="noopener noreferrer">🔍 <b>Find in Group</b></a>',
-                        unsafe_allow_html=True,
-                    )
+                clean_title_js = title.replace("'", "\\'")
+                copy_button_html = f"""
+                <button onclick="navigator.clipboard.writeText('{clean_title_js}'); alert('Title copied to clipboard!');" 
+                        style="background-color:#f0f2f6; border:1px solid #d0d4dc; border-radius:4px; padding:3px 8px; font-size:12px; cursor:pointer; margin-left:10px;">
+                    📋 Copy Title
+                </button>
+                """
+                st.markdown(
+                    f'<a href="{url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Facebook Post</b></a> {copy_button_html}',
+                    unsafe_allow_html=True,
+                )
             else:
                 st.markdown(
                     f'<a href="{url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Link</b></a>',
