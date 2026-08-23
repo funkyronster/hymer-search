@@ -6,64 +6,65 @@ st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
 st.title("Classic Hymer Technical Archive Search")
 
 st.info(
-    "This search contains the entire index of the Classic Hymers Technical"
-    " Facebook Group. Type in a search term, and it will return descriptions"
-    " and links to the relevant Facebook posts."
+    "This search contains the entire index of the Classic Hymers Technical Facebook Group. "
+    "Type in a search term, and it will return descriptions and links to the relevant Facebook posts."
 )
 
-# 1. Parse master_archive.txt into strict [Title, URL] pairs
+# 1. Parse master_archive.txt cleanly into [Title, URL] pairs
 records = []
 try:
-  with open("master_archive.txt", "r", encoding="utf-8") as f:
-    lines = [line.strip() for line in f.readlines() if line.strip()]
+    with open("master_archive.txt", "r", encoding="utf-8") as f:
+        content = f.read()
 
-  for idx, line in enumerate(lines):
-    # Whenever a line contains a URL, pair it with the line directly above it
-    if "http://" in line or "https://" in line or "facebook.com" in line:
-      url_match = re.search(r"(https?://\S+)", line)
-      url = url_match.group(1) if url_match else line
+    # Split by blank lines to isolate entries cleanly
+    blocks = re.split(r'\n\s*\n', content)
 
-      # The title is the preceding line (if it wasn't also a URL)
-      if (
-          idx > 0
-          and not lines[idx - 1].startswith("http")
-          and "facebook.com" not in lines[idx - 1]
-      ):
-        title = lines[idx - 1]
-      else:
-        title = "Facebook Post"
+    for block in blocks:
+        lines = [l.strip() for l in block.splitlines() if l.strip()]
+        if not lines:
+            continue
 
-      records.append((title, url))
+        url = None
+        title = None
+
+        for line in lines:
+            if "facebook.com" in line or "http://" in line or "https://" in line:
+                match = re.search(r'(https?://\S+)', line)
+                url = match.group(1) if match else line
+            elif title is None:
+                # First non-URL line in the block is always the primary headline
+                title = line
+
+        if url and title:
+            records.append((title, url))
 
 except FileNotFoundError:
-  records = []
+    records = []
 
 # 2. Search Bar
-query = st.text_input(
-    "Enter a search term (e.g., 'rooflight', 'fridge gas', 'split charge'):"
-)
+query = st.text_input("Enter a search term (e.g., 'rooflight', 'fridge gas', 'split charge'):")
 
-# 3. Match against Title & Display Clean Results
+# 3. Search & Display Results
 if query:
-  # Split query into words so 'big rooflight' or 'roof light' works
-  search_terms = query.lower().replace("roof light", "rooflight").split()
+    # Treat 'roof light' and 'rooflight' identically
+    norm_query = query.lower().replace("roof light", "rooflight")
+    terms = norm_query.split()
 
-  matches = []
-  for title, url in records:
-    searchable_title = title.lower().replace("roof light", "rooflight")
-    if all(term in searchable_title for term in search_terms):
-      matches.append((title, url))
+    matches = []
+    for title, url in records:
+        norm_title = title.lower().replace("roof light", "rooflight")
+        if all(t in norm_title for t in terms):
+            matches.append((title, url))
 
-  if matches:
-    st.markdown(f"### Found {len(matches)} result(s):")
-    for title, url in matches:
-      # Format for mobile-safe permalink
-      clean_url = url.replace("www.facebook.com", "m.facebook.com").replace(
-          "/posts/", "/permalink/"
-      )
-
-      st.markdown(f"**{title}**")
-      st.markdown(f"[👉 Open Facebook Post]({clean_url})")
-      st.divider()
-  else:
-    st.warning("No matches found for that term. Try a broader keyword.")
+    if matches:
+        st.markdown(f"### Found {len(matches)} result(s):")
+        for title, url in matches:
+            clean_url = (
+                url.replace("www.facebook.com", "m.facebook.com")
+                   .replace("/posts/", "/permalink/")
+            )
+            st.markdown(f"**{title}**")
+            st.markdown(f"[👉 Open Facebook Post]({clean_url})")
+            st.divider()
+    else:
+        st.warning("No matches found for that term. Try a broader keyword.")
