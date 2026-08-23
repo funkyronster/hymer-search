@@ -11,9 +11,13 @@
     #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 15px; background: #fff; }
     .result-count { font-size: 0.85rem; font-weight: bold; color: #444; margin-bottom: 12px; }
     .item { padding: 12px 0; border-bottom: 1px solid #e2e2e2; }
-    .item-title { font-weight: 600; font-size: 1rem; margin-bottom: 8px; color: #111; }
-    .item-link { display: inline-block; background-color: #0066cc; color: #ffffff !important; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; }
-    .item-link:active { background-color: #004c99; }
+    .item-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; color: #111; }
+    .link-wrapper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .item-link { display: inline-block; background-color: #0066cc; color: #ffffff !important; text-decoration: none; padding: 7px 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 500; }
+    .item-link.youtube { background-color: #cc0000; }
+    .item-link.external { background-color: #2b7a4b; }
+    .item-link:active { opacity: 0.85; }
+    .domain-tag { font-size: 0.8rem; color: #666; }
   </style>
 </head>
 <body>
@@ -60,6 +64,23 @@
     const resultsContainer = document.getElementById('results');
     const resultCount = document.getElementById('resultCount');
 
+    function getLinkMeta(url) {
+      const lower = url.toLowerCase();
+      if (lower.includes('facebook.com') || lower.includes('fb.com')) {
+        return { label: '👉 Open Facebook Post', cssClass: '' };
+      } else if (lower.includes('youtube.com') || lower.includes('youtu.be')) {
+        return { label: '▶️ Open YouTube Video', cssClass: 'youtube' };
+      } else {
+        try {
+          const parsed = new URL(url);
+          const hostname = parsed.hostname.replace(/^www\./, '');
+          return { label: `🌐 Open Website (${hostname})`, cssClass: 'external' };
+        } catch (e) {
+          return { label: '🌐 Open External Link', cssClass: 'external' };
+        }
+      }
+    }
+
     searchBox.addEventListener('input', () => {
       const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
       if (!rawQuery) {
@@ -75,12 +96,17 @@
       });
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
-      resultsContainer.innerHTML = matches.map(item => `
-        <div class="item">
-          <div class="item-title">${item.title}</div>
-          <a class="item-link" href="${item.url}" target="_blank" rel="noopener noreferrer">👉 Open Facebook Post</a>
-        </div>
-      `).join('');
+      resultsContainer.innerHTML = matches.map(item => {
+        const meta = getLinkMeta(item.url);
+        return `
+          <div class="item">
+            <div class="item-title">${item.title}</div>
+            <div class="link-wrapper">
+              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
+            </div>
+          </div>
+        `;
+      }).join('');
     });
   </script>
 </body>
