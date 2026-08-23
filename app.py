@@ -32,7 +32,7 @@ if query:
   with st.spinner("Searching archive..."):
     try:
       response = client.models.generate_content(
-          model="gemini-2.5-flash",
+          model="gemini-3-flash-preview",
           contents=query,
           config={"system_instruction": system_instruction},
       )
