@@ -1,4 +1,5 @@
 import re
+import urllib.parse
 import streamlit as st
 
 st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
@@ -6,9 +7,8 @@ st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
 st.title("Classic Hymer Technical Archive Search")
 
 st.info(
-    "Search the Classic Hymers Technical Facebook Group index by keyword.\n\n"
-    "📱 **iPhone Users:** If a Facebook post opens to a blank 'Story' screen, "
-    "simply copy the **Post ID** shown below each result and paste it into the Facebook group search bar."
+    "Search the Classic Hymers Technical Facebook Group index by keyword. "
+    "Type a search term below to find specific guides and discussions."
 )
 
 # 1. Parse master_archive.txt into [Title, URL] pairs
@@ -41,7 +41,7 @@ except FileNotFoundError:
     records = []
 
 # 2. Search Bar
-query = st.text_input("Enter a search term (e.g., 'rooflight', 'fridge gas', 'split charge'):")
+query = st.text_input("Enter a search term (e.g., 'rooflight', 'fridge gas', 'curtain hooks'):")
 
 # 3. Match and Render
 if query:
@@ -59,14 +59,31 @@ if query:
         for title, url in matches:
             st.markdown(f"**{title}**")
 
-            # Extract post ID if available
-            fb_match = re.search(r'facebook\.com/groups/\d+/(?:posts|permalink)/(\d+)', url)
-            
-            if fb_match:
-                post_id = fb_match.group(1)
-                st.markdown(f'<a href="{url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Facebook Post</b></a> &nbsp;|&nbsp; `Post ID: {post_id}`', unsafe_allow_html=True)
+            if "facebook.com" in url:
+                # 1. Direct clean URL
+                clean_url = url.replace("m.facebook.com", "www.facebook.com")
+                
+                # 2. Fallback Group Search URL (100% reliable on iOS inside Facebook app)
+                # Encodes the exact post title to search within group 297054424534823
+                encoded_search = urllib.parse.quote(title)
+                search_fallback_url = f"https://www.facebook.com/groups/297054424534823/search/?q={encoded_search}"
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        f'<a href="{clean_url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Post</b></a>',
+                        unsafe_allow_html=True,
+                    )
+                with col2:
+                    st.markdown(
+                        f'<a href="{search_fallback_url}" target="_blank" rel="noopener noreferrer">🔍 <b>Find in Group</b></a>',
+                        unsafe_allow_html=True,
+                    )
             else:
-                st.markdown(f'<a href="{url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Link</b></a>', unsafe_allow_html=True)
+                st.markdown(
+                    f'<a href="{url}" target="_blank" rel="noopener noreferrer">👉 <b>Open Link</b></a>',
+                    unsafe_allow_html=True,
+                )
 
             st.divider()
     else:
