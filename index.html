@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Classic Hymer Technical Archive Search</title>
 
-  <!-- Fuzzy Search Engine -->
+  <!-- Fuzzy Search Engine (Fallback for Typos) -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js"></script>
   
   <style>
@@ -67,9 +67,9 @@
 
         fuse = new Fuse(archiveData, {
           keys: ['searchIndex', 'title'],
-          threshold: 0.3,
+          threshold: 0.35,
           ignoreLocation: true,
-          minMatchCharLength: 2
+          minMatchCharLength: 3
         });
       });
 
@@ -102,19 +102,22 @@
         return;
       }
 
-      // 1. Direct Substring Check: catches exact words, plurals (window -> windows), and short acronyms (lpg)
-      const directMatches = archiveData.filter(item => item.searchIndex.includes(rawQuery));
+      // Split into query tokens (supports multi-word searches like "truma fan")
+      const tokens = rawQuery.split(/\s+/).filter(Boolean);
+
+      // 1. Exact token/substring match across all terms
+      const directMatches = archiveData.filter(item => 
+        tokens.every(token => item.searchIndex.includes(token))
+      );
 
       let matches = [];
 
-      if (rawQuery.length <= 3) {
+      if (directMatches.length > 0) {
+        // Direct hits found: use them strictly and ignore fuzzy near-rhymes
         matches = directMatches;
-      } else {
-        // 2. For longer queries: combine direct substring hits with typo fuzzy matches
-        const fuzzyMatches = fuse ? fuse.search(rawQuery).map(res => res.item) : [];
-        const combined = [...directMatches, ...fuzzyMatches];
-        // Deduplicate
-        matches = Array.from(new Set(combined));
+      } else if (rawQuery.length > 3 && fuse) {
+        // Zero direct hits: engage fuzzy engine to rescue legitimate typos (e.g. "roflite")
+        matches = fuse.search(rawQuery).map(res => res.item);
       }
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
