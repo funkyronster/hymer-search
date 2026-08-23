@@ -39,6 +39,15 @@ if query:
                 contents=query,
                 config={"system_instruction": system_instruction}
             )
-            st.markdown(response.text)
+            
+            # Automatically format links to avoid the iOS blank "Story" redirect error
+            clean_output = (
+                response.text
+                .replace("www.facebook.com", "m.facebook.com")
+                .replace("/posts/", "/permalink/")
+            )
+            
+            st.markdown(clean_output)
+            
         except Exception as e:
             st.error(f"Error fetching results: {e}")
