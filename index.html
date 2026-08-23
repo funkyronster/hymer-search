@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Classic Hymer Technical Archive Search</title>
+  <!-- Fast client-side fuzzy search engine -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px 15px; color: #222; line-height: 1.4; background-color: #fcfcfc; }
     h1 { font-size: 1.35rem; margin-bottom: 6px; color: #111; }
@@ -17,7 +19,6 @@
     .item-link.youtube { background-color: #cc0000; }
     .item-link.external { background-color: #2b7a4b; }
     .item-link:active { opacity: 0.85; }
-    .domain-tag { font-size: 0.8rem; color: #666; }
   </style>
 </head>
 <body>
@@ -32,8 +33,9 @@
 
   <script>
     let archiveData = [];
+    let fuse = null;
 
-    // Fetch master_archive.txt directly from the repository root
+    // Fetch master_archive.txt directly
     fetch('master_archive.txt')
       .then(r => r.text())
       .then(text => {
@@ -55,8 +57,18 @@
           });
 
           if (title && url) {
-            archiveData.push({ title: title, url: url });
+            // Normalise roof light variations for index matching
+            const searchIndex = title.toLowerCase().replace(/roof light/g, 'rooflight');
+            archiveData.push({ title: title, searchIndex: searchIndex, url: url });
           }
+        });
+
+        // Initialise Fuse.js with balanced fuzzy thresholds
+        fuse = new Fuse(archiveData, {
+          keys: ['searchIndex', 'title'],
+          threshold: 0.35,      // 0.0 = exact match, 1.0 = match anything. 0.35 gives strong typo tolerance without noise
+          ignoreLocation: true, // Finds words anywhere in the title
+          minMatchCharLength: 2
         });
       });
 
@@ -82,21 +94,19 @@
     }
 
     searchBox.addEventListener('input', () => {
-      const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
-      if (!rawQuery) {
+      const rawQuery = searchBox.value.trim().replace(/roof light/g, 'rooflight');
+      if (!rawQuery || !fuse) {
         resultsContainer.innerHTML = '';
         resultCount.textContent = '';
         return;
       }
 
-      const terms = rawQuery.split(/\s+/);
-      const matches = archiveData.filter(item => {
-        const normTitle = item.title.toLowerCase().replace(/roof light/g, 'rooflight');
-        return terms.every(t => normTitle.includes(t));
-      });
+      // Execute fuzzy search
+      const searchResults = fuse.search(rawQuery);
 
-      resultCount.textContent = `Found ${matches.length} result(s)`;
-      resultsContainer.innerHTML = matches.map(item => {
+      resultCount.textContent = `Found ${searchResults.length} result(s)`;
+      resultsContainer.innerHTML = searchResults.map(res => {
+        const item = res.item;
         const meta = getLinkMeta(item.url);
         return `
           <div class="item">
