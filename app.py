@@ -1,0 +1,41 @@
+from google import genai
+import streamlit as st
+
+st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
+st.title("Classic Hymer Technical Archive Search")
+st.caption("Search old group posts, guides, and technical discussions.")
+
+# 1. Load your master text file
+try:
+  with open("master_archive.txt", "r", encoding="utf-8") as f:
+    archive_data = f.read()
+except FileNotFoundError:
+  archive_data = "No archive data found."
+
+# 2. System Instruction
+system_instruction = f"""
+You are a precise technical group assistant. Your task is to look up the user's query in the attached document for exact matches. Output these strictly inside a Markdown code box labeled "--- FILE MATCHES ---". Inside this box, list only the descriptions and URLs found in the file. No conversational text outside the box.
+
+DOCUMENT DATA:
+{archive_data}
+"""
+
+# 3. Setup API Client
+client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
+
+# 4. Search Bar
+query = st.text_input(
+    "Enter a search term (e.g., 'headlight', 'fridge gas', 'split charge'):"
+)
+
+if query:
+  with st.spinner("Searching archive..."):
+    try:
+      response = client.models.generate_content(
+          model="gemini-2.5-flash",
+          contents=query,
+          config={"system_instruction": system_instruction},
+      )
+      st.markdown(response.text)
+    except Exception as e:
+      st.error(f"Error fetching results: {e}")
