@@ -5,18 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Classic Hymer Technical Archive Search</title>
 
-  <!-- App Icons -->
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
-  <meta name="apple-mobile-web-app-title" content="Hymer Search">
-
   <!-- Fuzzy Search Engine -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js"></script>
   
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px 15px; color: #222; line-height: 1.4; background-color: #fcfcfc; }
-    h1 { font-size: 1.35rem; margin-bottom: 6px; color: #111; }
-    p.intro { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
+    h1 { font-size: 1.35rem; margin-bottom: 8px; color: #111; }
+    .intro { font-size: 0.92rem; color: #444; margin-bottom: 16px; line-height: 1.45; }
     #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 15px; background: #fff; }
     .result-count { font-size: 0.85rem; font-weight: bold; color: #444; margin-bottom: 12px; }
     .item { padding: 12px 0; border-bottom: 1px solid #e2e2e2; }
@@ -26,47 +21,24 @@
     .item-link.youtube { background-color: #cc0000; }
     .item-link.external { background-color: #2b7a4b; }
     .item-link:active { opacity: 0.85; }
-    
-    /* Help Drawer Styling */
-    details.help-box { margin-top: 30px; padding: 12px; background: #f0f4f8; border: 1px solid #d0dbe5; border-radius: 8px; font-size: 0.85rem; color: #333; }
-    details.help-box summary { font-weight: 600; cursor: pointer; color: #0066cc; }
-    details.help-box p { margin: 8px 0 4px; }
-    details.help-box ol { margin: 4px 0 10px 18px; padding: 0; }
-    details.help-box li { margin-bottom: 4px; }
   </style>
 </head>
 <body>
 
   <h1>Classic Hymer Technical Archive</h1>
-  <p class="intro">Search our complete Facebook group technical archive by keyword.</p>
+  <div class="intro">
+    Over the years, our group has built up a massive repository of technical guides, wiring diagrams, part numbers, and troubleshooting advice. Type a keyword below to search the entire archive instantly.
+  </div>
 
   <input type="text" id="searchBox" placeholder="Type search term (e.g. rooflight, fridge, 12V)..." autofocus>
   
   <div id="resultCount" class="result-count"></div>
   <div id="results"></div>
 
-  <!-- Collapsible Add-to-Screen Help -->
-  <details class="help-box">
-    <summary>📱 How to add this search tool to your phone screen</summary>
-    <p><strong>iPhone / iPad (Safari):</strong></p>
-    <ol>
-      <li>Tap the <strong>Share button</strong> at the bottom (square with an up arrow ⬆️).</li>
-      <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
-      <li>Tap <strong>Add</strong> in the top-right corner.</li>
-    </ol>
-    <p><strong>Android / Samsung (Chrome):</strong></p>
-    <ol>
-      <li>Tap the <strong>three dots menu (⋮)</strong> in the top-right corner.</li>
-      <li>Tap <strong>Add to Home screen</strong> (or <em>Install app</em>).</li>
-      <li>Tap <strong>Add</strong>.</li>
-    </ol>
-  </details>
-
   <script>
     let archiveData = [];
     let fuse = null;
 
-    // Fetch master_archive.txt directly
     fetch('master_archive.txt')
       .then(r => r.text())
       .then(text => {
@@ -93,7 +65,6 @@
           }
         });
 
-        // Initialise Fuse.js
         fuse = new Fuse(archiveData, {
           keys: ['searchIndex', 'title'],
           threshold: 0.35,
@@ -141,7 +112,7 @@
           <div class="item">
             <div class="item-title">${item.title}</div>
             <div class="link-wrapper">
-              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
+              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_top" rel="noopener noreferrer">${meta.label}</a>
             </div>
           </div>
         `;
