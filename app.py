@@ -1,4 +1,3 @@
-import difflib
 import re
 import streamlit as st
 
@@ -12,35 +11,29 @@ st.info(
     " and links to the relevant Facebook posts."
 )
 
-# 1. Load archive and parse cleanly
+# 1. Parse master_archive.txt into strict [Title, URL] pairs
 records = []
 try:
   with open("master_archive.txt", "r", encoding="utf-8") as f:
-    raw_text = f.read()
+    lines = [line.strip() for line in f.readlines() if line.strip()]
 
-  # Split into blocks separated by blank lines
-  blocks = re.split(r"\n\s*\n", raw_text)
+  for idx, line in enumerate(lines):
+    # Whenever a line contains a URL, pair it with the line directly above it
+    if "http://" in line or "https://" in line or "facebook.com" in line:
+      url_match = re.search(r"(https?://\S+)", line)
+      url = url_match.group(1) if url_match else line
 
-  for block in blocks:
-    lines = [line.strip() for line in block.splitlines() if line.strip()]
-    if not lines:
-      continue
-
-    url_match = None
-    desc_lines = []
-
-    for l in lines:
-      if "http://" in l or "https://" in l or "facebook.com" in l:
-        found = re.search(r"(https?://\S+)", l)
-        url_match = found.group(1) if found else l
+      # The title is the preceding line (if it wasn't also a URL)
+      if (
+          idx > 0
+          and not lines[idx - 1].startswith("http")
+          and "facebook.com" not in lines[idx - 1]
+      ):
+        title = lines[idx - 1]
       else:
-        desc_lines.append(l)
+        title = "Facebook Post"
 
-    if url_match:
-      title = desc_lines[0] if desc_lines else "Facebook Post"
-      # Store full text for searching, but display only the title
-      search_context = " ".join(desc_lines)
-      records.append((title, search_context, url_match))
+      records.append((title, url))
 
 except FileNotFoundError:
   records = []
@@ -50,32 +43,21 @@ query = st.text_input(
     "Enter a search term (e.g., 'rooflight', 'fridge gas', 'split charge'):"
 )
 
-# 3. Search & Render Clean Title + Link Only
+# 3. Match against Title & Display Clean Results
 if query:
-  search_terms = query.lower().split()
+  # Split query into words so 'big rooflight' or 'roof light' works
+  search_terms = query.lower().replace("roof light", "rooflight").split()
+
   matches = []
-
-  for title, search_context, url in records:
-    full_searchable = f"{title} {search_context}".lower()
-
-    all_matched = True
-    for term in search_terms:
-      if term in full_searchable:
-        continue
-      words_in_text = re.findall(r"\w+", full_searchable)
-      close_matches = difflib.get_close_matches(
-          term, words_in_text, n=1, cutoff=0.75
-      )
-      if not close_matches:
-        all_matched = False
-        break
-
-    if all_matched:
+  for title, url in records:
+    searchable_title = title.lower().replace("roof light", "rooflight")
+    if all(term in searchable_title for term in search_terms):
       matches.append((title, url))
 
   if matches:
     st.markdown(f"### Found {len(matches)} result(s):")
     for title, url in matches:
+      # Format for mobile-safe permalink
       clean_url = url.replace("www.facebook.com", "m.facebook.com").replace(
           "/posts/", "/permalink/"
       )
