@@ -65,9 +65,10 @@
           }
         });
 
+        // Tighter threshold for long words: catches typos without scattergun matching
         fuse = new Fuse(archiveData, {
           keys: ['searchIndex', 'title'],
-          threshold: 0.35,
+          threshold: 0.2,
           ignoreLocation: true,
           minMatchCharLength: 2
         });
@@ -95,18 +96,25 @@
     }
 
     searchBox.addEventListener('input', () => {
-      const rawQuery = searchBox.value.trim().replace(/roof light/g, 'rooflight');
-      if (!rawQuery || !fuse) {
+      const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
+      if (!rawQuery) {
         resultsContainer.innerHTML = '';
         resultCount.textContent = '';
         return;
       }
 
-      const searchResults = fuse.search(rawQuery);
+      let matches = [];
 
-      resultCount.textContent = `Found ${searchResults.length} result(s)`;
-      resultsContainer.innerHTML = searchResults.map(res => {
-        const item = res.item;
+      // Short queries (e.g. LPG, EBL, 12V): exact substring match only
+      if (rawQuery.length <= 3) {
+        matches = archiveData.filter(item => item.searchIndex.includes(rawQuery));
+      } else if (fuse) {
+        // Longer queries: run tight fuzzy search
+        matches = fuse.search(rawQuery).map(res => res.item);
+      }
+
+      resultCount.textContent = `Found ${matches.length} result(s)`;
+      resultsContainer.innerHTML = matches.map(item => {
         const meta = getLinkMeta(item.url);
         return `
           <div class="item">
