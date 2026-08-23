@@ -65,7 +65,6 @@
           }
         });
 
-        // Tighter threshold for long words: catches typos without scattergun matching
         fuse = new Fuse(archiveData, {
           keys: ['searchIndex', 'title'],
           threshold: 0.2,
@@ -105,11 +104,9 @@
 
       let matches = [];
 
-      // Short queries (e.g. LPG, EBL, 12V): exact substring match only
       if (rawQuery.length <= 3) {
         matches = archiveData.filter(item => item.searchIndex.includes(rawQuery));
       } else if (fuse) {
-        // Longer queries: run tight fuzzy search
         matches = fuse.search(rawQuery).map(res => res.item);
       }
 
@@ -120,7 +117,7 @@
           <div class="item">
             <div class="item-title">${item.title}</div>
             <div class="link-wrapper">
-              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_top" rel="noopener noreferrer">${meta.label}</a>
+              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
             </div>
           </div>
         `;
