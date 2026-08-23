@@ -67,7 +67,7 @@
 
         fuse = new Fuse(archiveData, {
           keys: ['searchIndex', 'title'],
-          threshold: 0.35,
+          threshold: 0.3,
           ignoreLocation: true,
           minMatchCharLength: 2
         });
@@ -102,12 +102,19 @@
         return;
       }
 
+      // 1. Direct Substring Check: catches exact words, plurals (window -> windows), and short acronyms (lpg)
+      const directMatches = archiveData.filter(item => item.searchIndex.includes(rawQuery));
+
       let matches = [];
 
       if (rawQuery.length <= 3) {
-        matches = archiveData.filter(item => item.searchIndex.includes(rawQuery));
-      } else if (fuse) {
-        matches = fuse.search(rawQuery).map(res => res.item);
+        matches = directMatches;
+      } else {
+        // 2. For longer queries: combine direct substring hits with typo fuzzy matches
+        const fuzzyMatches = fuse ? fuse.search(rawQuery).map(res => res.item) : [];
+        const combined = [...directMatches, ...fuzzyMatches];
+        // Deduplicate
+        matches = Array.from(new Set(combined));
       }
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
