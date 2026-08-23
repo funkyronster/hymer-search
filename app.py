@@ -1,4 +1,3 @@
-from google import genai
 import streamlit as st
 
 st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
@@ -6,51 +5,41 @@ st.set_page_config(page_title="Classic Hymer Archive Search", layout="centered")
 st.title("Classic Hymer Technical Archive Search")
 
 st.info(
-    "This AI search contains the entire index of the Classic Hymers Technical"
+    "This search contains the entire index of the Classic Hymers Technical"
     " Facebook Group. Type in a search term, and it will return descriptions"
-    " and links to the Facebook posts that are relevant."
+    " and links to the relevant Facebook posts."
 )
 
 # 1. Load your master text file
 try:
   with open("master_archive.txt", "r", encoding="utf-8") as f:
-    archive_data = f.read()
+    archive_lines = f.readlines()
 except FileNotFoundError:
-  archive_data = "No archive data found."
+  archive_lines = []
 
-# 2. System Instruction
-system_instruction = f"""
-You are a precise technical group assistant. Your task is to look up the user's query in the attached document for exact matches. Output these strictly inside a Markdown code box labeled "--- FILE MATCHES ---". Inside this box, list only the descriptions and URLs found in the file. No conversational text outside the box.
-
-DOCUMENT DATA:
-{archive_data}
-"""
-
-# 3. Setup API Client
-client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-
-# 4. Search Bar
+# 2. Search Bar
 query = st.text_input(
     "Enter a search term (e.g., 'headlight', 'fridge gas', 'split charge'):"
 )
 
+# 3. Local Search Logic
 if query:
-  with st.spinner("Searching archive..."):
-    try:
-      response = client.models.generate_content(
-          model="gemini-3.6-flash",
-          contents=query,
-          config={"system_instruction": system_instruction},
+  terms = query.lower().split()
+
+  # Match lines containing all typed search terms
+  matches = [
+      line.strip()
+      for line in archive_lines
+      if all(t in line.lower() for t in terms)
+  ]
+
+  if matches:
+    st.markdown("### --- FILE MATCHES ---")
+    for m in matches:
+      # Convert URLs to mobile-safe permalinks
+      clean_match = m.replace("www.facebook.com", "m.facebook.com").replace(
+          "/posts/", "/permalink/"
       )
-
-      # Automatically format links to avoid the iOS blank "Story" redirect error
-      clean_output = (
-          response.text.replace("www.facebook.com", "m.facebook.com").replace(
-              "/posts/", "/permalink/"
-          )
-      )
-
-      st.markdown(clean_output)
-
-    except Exception as e:
-      st.error(f"Error fetching results: {e}")
+      st.write(clean_match)
+  else:
+    st.warning("No matches found for that term. Try a broader keyword.")
