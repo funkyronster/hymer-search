@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Classic Hymer Technical Archive Search</title>
 
+  <!-- GoatCounter Analytics (Cookie-free, GDPR compliant) -->
+  <script data-goatcounter="https://hymer-search.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
   <!-- Fuzzy Search Engine (Fallback for Typos) -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js"></script>
   
@@ -38,6 +42,7 @@
   <script>
     let archiveData = [];
     let fuse = null;
+    let searchDebounceTimer = null;
 
     fetch('master_archive.txt')
       .then(r => r.text())
@@ -94,18 +99,36 @@
       }
     }
 
+    function logSearchToAnalytics(query) {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({
+          path: '/search?q=' + encodeURIComponent(query),
+          title: 'Search: ' + query,
+          event: true
+        });
+      }
+    }
+
     searchBox.addEventListener('input', () => {
       const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
+      
+      // Debounce analytics tracking: log keyword only after typing pauses for 800ms
+      clearTimeout(searchDebounceTimer);
+      if (rawQuery.length >= 2) {
+        searchDebounceTimer = setTimeout(() => {
+          logSearchToAnalytics(rawQuery);
+        }, 800);
+      }
+
       if (!rawQuery) {
         resultsContainer.innerHTML = '';
         resultCount.textContent = '';
         return;
       }
 
-      // Split into query tokens (supports multi-word searches like "truma fan")
       const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-      // 1. Exact token/substring match across all terms
+      // Exact substring match first
       const directMatches = archiveData.filter(item => 
         tokens.every(token => item.searchIndex.includes(token))
       );
@@ -113,10 +136,8 @@
       let matches = [];
 
       if (directMatches.length > 0) {
-        // Direct hits found: use them strictly and ignore fuzzy near-rhymes
         matches = directMatches;
       } else if (rawQuery.length > 3 && fuse) {
-        // Zero direct hits: engage fuzzy engine to rescue legitimate typos (e.g. "roflite")
         matches = fuse.search(rawQuery).map(res => res.item);
       }
 
