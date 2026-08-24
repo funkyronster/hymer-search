@@ -1,0 +1,35 @@
+# Troubleshooting Classic Hymer Absorption Fridges on Gas
+
+The classic Electrolux / Dometic 3-way absorption fridge (such as the RM270, RM275, and 4-series units) found in pre-1995 classic Hymer motorhomes is simple, robust, and fully repairable[cite: 1, 4, 5]. Unlike modern electronic AES units, these rely entirely on mechanical gas valves, basic ignition circuits, and physical heat exchange[cite: 1].
+
+When a fridge fails on gas, owners often assume the unit is dead[cite: 1]. If it operates normally on 230 V mains electric, the sealed cooling unit (ammonia, hydrogen, and sodium chromate mix) is completely sound[cite: 1, 2]. The issue is isolated entirely to the gas burner, ignition circuit, or flue assembly[cite: 1, 3].
+
+---
+
+## 1. Fast Field Checks (Before Stripping Components)
+
+1. **Verify Cooling on 230 V Mains:** Plug the motorhome into mains hookup and leave the fridge running on 230 V for several hours[cite: 1, 2]. If the freezer box gets cold and you feel heat rising from the upper exterior vent, the cooling mechanism is fully intact[cite: 1, 2].
+2. **Confirm Gas Supply & Bottle Pressure:** Light all rings on the gas hob to confirm steady supply[cite: 1]. A nearly empty bottle delivers enough pressure for a hob burner but will starve the fridge jet[cite: 1]. Classic pre-1995 German Hymers operate on a **50 mbar** gas infrastructure (vans built after 1995 standardise on **30 mbar**)[cite: 1, 3]. Ensure your bottle regulator matches your vehicle's rating—50 mbar (preferably propane) for pre-1995 models—rather than standard UK 37/30 mbar[cite: 1, 3].
+3. **Check Isolation Valves:** Ensure the inline gas manifold tap dedicated to the fridge is fully open[cite: 3].
+4. **Control Knob Engagement:** Ensure the main push-and-turn gas control dial is fully depressing its inner shaft[cite: 1]. If the knob has slipped on its spindle, it will fail to mechanically push the safety magnet valve in far enough to initiate gas flow[cite: 1].
+5. **12 V Habitation Master Switch:** On several conversions and rewired classic layouts, the ignition circuit feed is interlocked through the main 12 V habitation control switch on the central control panel[cite: 2]. Confirm 12 V habitation power is active[cite: 2].
+
+---
+
+## 2. Diagnosing the Ignition Systems (Piezo, Battery & Red Switch)
+
+Depending on the age and exact model of your Electrolux/Dometic fridge, you will encounter one of three ignition variants:
+
+### Variant A: Manual Mechanical Piezo (Early Models, e.g. RM270)
+* **How it works:** A mechanical plunger button on the fascia that you push firmly with a distinct "clack"[cite: 1, 5]. It requires zero 12 V battery power, generating an HT spark purely via internal crystal impact[cite: 5].
+* **Diagnosis:** If there is no spark at the burner crown, inspect the ceramic electrode and HT lead for fractures, oil contamination, or grounding against chassis metal[cite: 1, 5]. The piezo push units are fully mechanical and can be unscrewed from the fascia for replacement if the internal striker spring weakens.
+
+### Variant B: Single AA Battery Electronic Igniter (Mid/Late Units & Replacements)
+* **How it works:** A push-button switch that houses an internal **1.5 V AA battery** inside the switch body itself, completely independent of the vehicle's 12 V habitation electrics.
+* **Diagnosis:** 
+  * Unscrew the textured round push-button cap (counter-clockwise) on the fridge fascia to expose the battery compartment.
+  * Check for a flat, leaked, or corroded AA cell. Clean the spring contacts and fit a fresh alkaline battery with the positive (+) terminal facing outward.
+  * When pressed, the internal solid-state unit should produce a rapid, continuous stream of sparks at the burner until released.
+
+### Variant C: 12 V Powered Electronic Module with Flashing Red Switch (e.g. RM275 / RM42xx)
+* **How it works:** Uses vehicle 12 V habitation power[cite: 1, 5]. Turning the red rocker switch on energises an electronic spark generator module mounted out of sight[cite: 1, 5].
