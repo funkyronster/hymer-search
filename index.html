@@ -76,9 +76,9 @@
 
         fuse = new Fuse(archiveData, {
           keys: ['title', 'searchIndex'],
-          threshold: 0.4,
+          threshold: 0.35,
           ignoreLocation: true,
-          minMatchCharLength: 2
+          minMatchCharLength: 3
         });
       });
 
@@ -129,40 +129,45 @@
         return;
       }
 
-      const tokens = rawQuery.split(/\s+/).filter(Boolean);
+      // Ignore single character tokens that match everything indiscriminately
+      const tokens = rawQuery.split(/\s+/).filter(t => t.length >= 2);
+      if (tokens.length === 0) {
+        resultsContainer.innerHTML = '';
+        resultCount.textContent = '';
+        return;
+      }
 
-      // Score-based match: count how many tokens each entry contains
-      const scored = [];
-      archiveData.forEach(item => {
-        let matchCount = 0;
-        tokens.forEach(token => {
-          if (item.searchIndex.includes(token)) {
-            matchCount++;
-          }
-        });
-        if (matchCount > 0) {
-          scored.push({ item: item, score: matchCount });
-        }
-      });
+      // 1. Try strict match first: find items containing ALL typed tokens
+      const strictMatches = archiveData.filter(item =>
+        tokens.every(token => item.searchIndex.includes(token))
+      );
 
       let matches = [];
 
-      if (scored.length > 0) {
-        // Sort highest matching words first (e.g. matches 2 words before 1 word)
-        scored.sort((a, b) => b.score - a.score);
-        matches = scored.map(s => s.item);
-      } else if (fuse) {
-        // Fuzzy fallback if zero exact tokens matched (e.g. typos)
-        const fuzzyMap = new Map();
-        tokens.forEach(token => {
-          const res = fuse.search(token);
-          res.forEach(r => {
-            const count = (fuzzyMap.get(r.item) || 0) + 1;
-            fuzzyMap.set(r.item, count);
+      if (strictMatches.length > 0) {
+        matches = strictMatches;
+      } else {
+        // 2. Ranked Partial Match: count how many tokens match, prioritize highest
+        const scored = [];
+        archiveData.forEach(item => {
+          let score = 0;
+          tokens.forEach(token => {
+            if (item.searchIndex.includes(token)) {
+              score += token.length; // Weigh longer word matches higher (e.g. 'circuit' over 's5')
+            }
           });
+          if (score > 0) {
+            scored.push({ item: item, score: score });
+          }
         });
-        const fuzzySorted = [...fuzzyMap.entries()].sort((a, b) => b[1] - a[1]);
-        matches = fuzzySorted.map(entry => entry[0]);
+
+        if (scored.length > 0) {
+          scored.sort((a, b) => b.score - a.score);
+          matches = scored.map(s => s.item);
+        } else if (fuse) {
+          // 3. Fallback to Fuse.js for typo tolerance
+          matches = fuse.search(rawQuery).map(res => res.item);
+        }
       }
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
