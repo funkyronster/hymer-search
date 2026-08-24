@@ -54,7 +54,7 @@
           
           let url = null;
           let title = null;
-          let fullContent = block.toLowerCase().replace(/roof light/g, 'rooflight');
+          const fullContent = block.toLowerCase().replace(/roof light/g, 'rooflight');
 
           lines.forEach(line => {
             if (line.includes('http://') || line.includes('https://')) {
@@ -116,7 +116,6 @@
     searchBox.addEventListener('input', () => {
       const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
       
-      // Debounce analytics tracking: log keyword only after typing pauses for 800ms
       clearTimeout(searchDebounceTimer);
       if (rawQuery.length >= 2) {
         searchDebounceTimer = setTimeout(() => {
@@ -132,7 +131,7 @@
 
       const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-      // Direct multi-token match: checks that every word typed exists in the entry
+      // 1. Direct multi-token match (all typed words must appear anywhere in the block)
       const directMatches = archiveData.filter(item => 
         tokens.every(token => item.searchIndex.includes(token))
       );
@@ -142,17 +141,15 @@
       if (directMatches.length > 0) {
         matches = directMatches;
       } else if (fuse) {
-        // Multi-token fuzzy fallback: find items matching each token fuzzy
-        let tokenMatches = tokens.map(token => {
+        // 2. Fuzzy multi-token match: find matching items per token, then require intersection (AND)
+        const tokenMatches = tokens.map(token => {
           return new Set(fuse.search(token).map(res => res.item));
         });
 
         if (tokenMatches.length > 0) {
-          // Intersect the sets so all tokens must match
-          let intersection = [...tokenMatches[0]].filter(item =>
+          matches = [...tokenMatches[0]].filter(item =>
             tokenMatches.every(set => set.has(item))
           );
-          matches = intersection;
         }
       }
 
