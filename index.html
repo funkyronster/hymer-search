@@ -3,185 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Classic Hymers Technical Archive</title>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <title>Classic Hymer Technical Archive Search</title>
+
+  <!-- GoatCounter Analytics (Cookie-free, GDPR compliant) -->
+  <script data-goatcounter="https://hymer-search.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
+  <!-- Fuzzy Search Engine (Fallback for Typos) -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.basic.min.js"></script>
+  
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f6f8;
-      color: #333;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 1.6rem;
-      color: #1a202c;
-    }
-    #searchBox {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 1rem;
-      border: 2px solid #cbd5e0;
-      border-radius: 6px;
-      box-sizing: border-box;
-      outline: none;
-      margin-bottom: 20px;
-    }
-    #searchBox:focus {
-      border-color: #3182ce;
-    }
-    .status {
-      font-size: 0.9rem;
-      color: #718096;
-      margin-bottom: 15px;
-    }
-    .result-item {
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 18px;
-      margin-bottom: 16px;
-      background: #fafafa;
-    }
-    .result-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #2b6cb0;
-      margin: 0 0 8px 0;
-    }
-    .result-content {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: #4a5568;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .highlight {
-      background-color: #feebc8;
-      font-weight: bold;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px 15px; color: #222; line-height: 1.4; background-color: #fcfcfc; }
+    h1 { font-size: 1.35rem; margin-bottom: 8px; color: #111; }
+    .intro { font-size: 0.92rem; color: #444; margin-bottom: 16px; line-height: 1.45; }
+    #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 15px; background: #fff; }
+    .result-count { font-size: 0.85rem; font-weight: bold; color: #444; margin-bottom: 12px; }
+    .item { padding: 12px 0; border-bottom: 1px solid #e2e2e2; }
+    .item-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; color: #111; }
+    .link-wrapper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .item-link { display: inline-block; background-color: #0066cc; color: #ffffff !important; text-decoration: none; padding: 7px 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 500; }
+    .item-link.youtube { background-color: #cc0000; }
+    .item-link.external { background-color: #2b7a4b; }
+    .item-link:active { opacity: 0.85; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Classic Hymers Technical Archive</h1>
-    <input type="text" id="searchBox" placeholder="Search technical database (e.g. S500 circuit diag, KZ12, EBL 99)..." autofocus>
-    <div id="status" class="status">Loading archive...</div>
-    <div id="results"></div>
+
+  <h1>Classic Hymer Technical Archive</h1>
+  <div class="intro">
+    Over the years, our group has built up a massive repository of technical guides, wiring diagrams, part numbers, and troubleshooting advice. Type a keyword below to search the entire archive instantly.
   </div>
 
+  <input type="text" id="searchBox" placeholder="Type search term (e.g. rooflight, fridge, 12V)..." autofocus>
+  
+  <div id="resultCount" class="result-count"></div>
+  <div id="results"></div>
+
   <script>
+    let archiveData = [];
     let fuse = null;
-    let rawEntries = [];
+    let searchDebounceTimer = null;
 
-    // Fetch and parse master_archive.txt
     fetch('master_archive.txt')
-      .then(response => {
-        if (!response.ok) throw new Error('Could not load master_archive.txt');
-        return response.text();
-      })
-      .then(data => {
-        rawEntries = parseArchive(data);
-        
-        fuse = new Fuse(rawEntries, {
-          keys: ['title', 'content'],
-          threshold: 0.4,
+      .then(r => r.text())
+      .then(text => {
+        const blocks = text.split(/\n\s*\n/);
+        blocks.forEach(block => {
+          const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+          if (lines.length === 0) return;
+          
+          let url = null;
+          let title = null;
+
+          lines.forEach(line => {
+            if (line.includes('http://') || line.includes('https://')) {
+              const m = line.match(/(https?:\/\/\S+)/);
+              url = m ? m[1] : line;
+            } else if (!title) {
+              title = line;
+            }
+          });
+
+          if (title && url) {
+            const searchIndex = title.toLowerCase().replace(/roof light/g, 'rooflight');
+            archiveData.push({ title: title, searchIndex: searchIndex, url: url });
+          }
+        });
+
+        fuse = new Fuse(archiveData, {
+          keys: ['searchIndex', 'title'],
+          threshold: 0.35,
           ignoreLocation: true,
-          useExtendedSearch: true,
-          minMatchCharLength: 2
-        });
-
-        document.getElementById('status').innerText = `${rawEntries.length} technical entries loaded.`;
-      })
-      .catch(err => {
-        document.getElementById('status').innerText = 'Error loading archive file.';
-        console.error(err);
-      });
-
-    // Parse text blocks separated by double blank lines or headers
-    function parseArchive(text) {
-      const blocks = text.split(/\n\s*\n\s*\n/);
-      const entries = [];
-
-      blocks.forEach((block, index) => {
-        const trimmed = block.trim();
-        if (!trimmed) return;
-
-        const lines = trimmed.split('\n');
-        const firstLine = lines[0].replace(/^#+\s*/, '').trim();
-        const content = lines.slice(1).join('\n').trim();
-
-        entries.push({
-          id: index,
-          title: firstLine || `Entry ${index + 1}`,
-          content: content || trimmed
+          minMatchCharLength: 3
         });
       });
 
-      return entries;
-    }
+    const searchBox = document.getElementById('searchBox');
+    const resultsContainer = document.getElementById('results');
+    const resultCount = document.getElementById('resultCount');
 
-    // Execute multi-word AND search
-    function executeSearch(query) {
-      if (!fuse || !query.trim()) {
-        document.getElementById('results').innerHTML = '';
-        return;
-      }
-
-      const tokens = query.trim().split(/\s+/).filter(t => t.length > 0);
-      let results = [];
-
-      if (tokens.length > 1) {
-        // Build strict AND logic for multi-word searches
-        results = fuse.search({
-          $and: tokens.map(token => ({
-            $or: [
-              { title: token },
-              { content: token }
-            ]
-          }))
-        });
+    function getLinkMeta(url) {
+      const lower = url.toLowerCase();
+      if (lower.includes('facebook.com') || lower.includes('fb.com')) {
+        return { label: '👉 Open Facebook Post', cssClass: '' };
+      } else if (lower.includes('youtube.com') || lower.includes('youtu.be')) {
+        return { label: '▶️ Open YouTube Video', cssClass: 'youtube' };
       } else {
-        results = fuse.search(query.trim());
+        try {
+          const parsed = new URL(url);
+          const hostname = parsed.hostname.replace(/^www\./, '');
+          return { label: `🌐 Open Website (${hostname})`, cssClass: 'external' };
+        } catch (e) {
+          return { label: '🌐 Open External Link', cssClass: 'external' };
+        }
       }
-
-      renderResults(results);
     }
 
-    function renderResults(results) {
-      const container = document.getElementById('results');
-      if (results.length === 0) {
-        container.innerHTML = '<div class="status">No matching articles found.</div>';
+    function logSearchToAnalytics(query) {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({
+          path: '/search?q=' + encodeURIComponent(query),
+          title: 'Search: ' + query,
+          event: true
+        });
+      }
+    }
+
+    searchBox.addEventListener('input', () => {
+      const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
+      
+      // Debounce analytics tracking: log keyword only after typing pauses for 800ms
+      clearTimeout(searchDebounceTimer);
+      if (rawQuery.length >= 2) {
+        searchDebounceTimer = setTimeout(() => {
+          logSearchToAnalytics(rawQuery);
+        }, 800);
+      }
+
+      if (!rawQuery) {
+        resultsContainer.innerHTML = '';
+        resultCount.textContent = '';
         return;
       }
 
-      container.innerHTML = results.slice(0, 30).map(r => `
-        <div class="result-item">
-          <div class="result-title">${escapeHtml(r.item.title)}</div>
-          <div class="result-content">${escapeHtml(r.item.content)}</div>
-        </div>
-      `).join('');
-    }
+      const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-    function escapeHtml(text) {
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
+      // Exact substring match first
+      const directMatches = archiveData.filter(item => 
+        tokens.every(token => item.searchIndex.includes(token))
+      );
 
-    document.getElementById('searchBox').addEventListener('input', (e) => {
-      executeSearch(e.target.value);
+      let matches = [];
+
+      if (directMatches.length > 0) {
+        matches = directMatches;
+      } else if (rawQuery.length > 3 && fuse) {
+        matches = fuse.search(rawQuery).map(res => res.item);
+      }
+
+      resultCount.textContent = `Found ${matches.length} result(s)`;
+      resultsContainer.innerHTML = matches.map(item => {
+        const meta = getLinkMeta(item.url);
+        return `
+          <div class="item">
+            <div class="item-title">${item.title}</div>
+            <div class="link-wrapper">
+              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
+            </div>
+          </div>
+        `;
+      }).join('');
     });
   </script>
 </body>
