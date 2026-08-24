@@ -131,26 +131,38 @@
 
       const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-      // 1. Direct multi-token match (all typed words must appear anywhere in the block)
-      const directMatches = archiveData.filter(item => 
-        tokens.every(token => item.searchIndex.includes(token))
-      );
+      // Score-based match: count how many tokens each entry contains
+      const scored = [];
+      archiveData.forEach(item => {
+        let matchCount = 0;
+        tokens.forEach(token => {
+          if (item.searchIndex.includes(token)) {
+            matchCount++;
+          }
+        });
+        if (matchCount > 0) {
+          scored.push({ item: item, score: matchCount });
+        }
+      });
 
       let matches = [];
 
-      if (directMatches.length > 0) {
-        matches = directMatches;
+      if (scored.length > 0) {
+        // Sort highest matching words first (e.g. matches 2 words before 1 word)
+        scored.sort((a, b) => b.score - a.score);
+        matches = scored.map(s => s.item);
       } else if (fuse) {
-        // 2. Fuzzy multi-token match: find matching items per token, then require intersection (AND)
-        const tokenMatches = tokens.map(token => {
-          return new Set(fuse.search(token).map(res => res.item));
+        // Fuzzy fallback if zero exact tokens matched (e.g. typos)
+        const fuzzyMap = new Map();
+        tokens.forEach(token => {
+          const res = fuse.search(token);
+          res.forEach(r => {
+            const count = (fuzzyMap.get(r.item) || 0) + 1;
+            fuzzyMap.set(r.item, count);
+          });
         });
-
-        if (tokenMatches.length > 0) {
-          matches = [...tokenMatches[0]].filter(item =>
-            tokenMatches.every(set => set.has(item))
-          );
-        }
+        const fuzzySorted = [...fuzzyMap.entries()].sort((a, b) => b[1] - a[1]);
+        matches = fuzzySorted.map(entry => entry[0]);
       }
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
