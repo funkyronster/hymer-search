@@ -1,0 +1,129 @@
+TROUBLESHOOTING CLASSIC HYMER ABSORPTION FRIDGES ON GAS
+
+The classic Electrolux / Dometic 3-way absorption fridge (such as the RM270, RM275, and 4-series units) found in pre-1995 classic Hymer motorhomes is simple, robust, and fully repairable[cite: 1, 2]. Unlike modern electronic AES units, these rely entirely on mechanical gas valves, basic ignition circuits, and physical heat exchange[cite: 1, 2].
+
+When a fridge fails on gas, owners often assume the unit is dead[cite: 1, 2]. If it operates normally on 230 V mains electric, the sealed cooling unit (ammonia, hydrogen, and sodium chromate mix) is completely sound[cite: 1, 2]. The issue is isolated entirely to the gas burner, ignition circuit, or flue assembly[cite: 1, 2].
+
+
+1. FAST FIELD CHECKS (BEFORE STRIPPING COMPONENTS)
+
+1. Verify Cooling on 230 V Mains: Plug the motorhome into mains hookup and leave the fridge running on 230 V for several hours[cite: 1, 2]. If the freezer box gets cold and you feel heat rising from the upper exterior vent, the cooling mechanism is fully intact[cite: 1, 2].
+
+2. Confirm Gas Supply & Bottle Pressure: Light all rings on the gas hob to confirm steady supply[cite: 1, 2]. A nearly empty bottle delivers enough pressure for a hob burner but will starve the fridge jet[cite: 1, 2]. Classic pre-1995 German Hymers operate on a 50 mbar gas infrastructure (vans built after 1995 standardise on 30 mbar)[cite: 1, 2]. Ensure your bottle regulator matches your vehicle's rating—50 mbar (preferably propane) for pre-1995 models—rather than standard UK 37/30 mbar[cite: 1, 2].
+
+3. Check Isolation Valves: Ensure the inline gas manifold tap dedicated to the fridge is fully open[cite: 2].
+
+4. Control Knob Engagement: Ensure the main push-and-turn gas control dial is fully depressing its inner shaft[cite: 1, 2]. If the knob has slipped on its spindle, it will fail to mechanically push the safety magnet valve in far enough to initiate gas flow[cite: 1, 2].
+
+5. 12 V Habitation Master Switch: On several conversions and rewired classic layouts, the ignition circuit feed is interlocked through the main 12 V habitation control switch on the central control panel[cite: 2]. Confirm 12 V habitation power is active[cite: 2].
+
+
+2. DIAGNOSING THE IGNITION SYSTEMS (PIEZO, BATTERY & RED SWITCH)
+
+Depending on the age and exact model of your Electrolux/Dometic fridge, you will encounter one of three ignition variants:
+
+VARIANT A: MANUAL MECHANICAL PIEZO (EARLY MODELS, E.G. RM270)
+- How it works: A mechanical plunger button on the fascia that you push firmly with a distinct "clack"[cite: 1, 2]. It requires zero 12 V battery power, generating an HT spark purely via internal crystal impact[cite: 1, 2].
+- Diagnosis: If there is no spark at the burner crown, inspect the ceramic electrode and HT lead for fractures, oil contamination, or grounding against chassis metal[cite: 1, 2]. The piezo push units are fully mechanical and can be unscrewed from the fascia for replacement if the internal striker spring weakens[cite: 2].
+
+VARIANT B: SINGLE AA BATTERY ELECTRONIC IGNITER (MID/LATE UNITS & REPLACEMENTS)
+- How it works: A push-button switch that houses an internal 1.5 V AA battery inside the switch body itself, completely independent of the vehicle's 12 V habitation electrics[cite: 2].
+- Diagnosis: 
+  * Unscrew the textured round push-button cap (counter-clockwise) on the fridge fascia to expose the battery compartment[cite: 2].
+  * Check for a flat, leaked, or corroded AA cell[cite: 2]. Clean the spring contacts and fit a fresh alkaline battery with the positive (+) terminal facing outward[cite: 2].
+  * When pressed, the internal solid-state unit should produce a rapid, continuous stream of sparks at the burner until released[cite: 2].
+
+VARIANT C: 12 V POWERED ELECTRONIC MODULE WITH FLASHING RED SWITCH (E.G. RM275 / RM42XX)
+- How it works: Uses vehicle 12 V habitation power[cite: 1, 2]. Turning the red rocker switch on energises an electronic spark generator module mounted out of sight[cite: 1, 2].
+- Wiring Path: +12V Feed (Habitation Fuse) -> [Red Switch Terminals 1 & 1a] -> [Igniter Module] -> HT Spark Pulse to Spark Electrode[cite: 2]. A secondary pulse wire connects module terminal GL3 to switch terminal 1b to synchronize the flashing lamp[cite: 1, 2].
+- Circuit Operation: When switched on, terminals 1 and 1a close, sending 12 V to the ignition box[cite: 1, 2]. The box fires repetitive sparks (approx. twice per second) via the HT lead to the burner electrode while pulsing terminal GL3 to flash the switch lamp[cite: 1, 2].
+- Flame Rectification Sensing: The module uses the spark electrode itself as a flame sensor[cite: 1, 2]. Once the gas lights, the ionized flame conducts a small DC current to earth through the burner crown[cite: 1, 2]. The module detects this path and automatically stops sparking and flashing[cite: 1, 2]. If the flame blows out, the circuit is broken and the module immediately resumes sparking to reignite the gas[cite: 1, 2].
+- No Ticking and No Flash: Check the 12 V fuse board[cite: 2]. The exact fuse location depends on the van model and year (often Fuse 2 on pre-1995 layouts, but consult your manual or the group fuse chart)[cite: 1, 2]. Fridge ignition is rarely listed as a standalone circuit on Hymer fuse legends; it is almost always shared with the general kitchen circuit (lighting or extractor fan)[cite: 1, 2]. If the kitchen lights/fan work, the fuse is intact[cite: 1, 2]. Inspect and clean the 12 V multi-way connector blocks behind the lower exterior fridge vent[cite: 1, 2]. Ensure the single screw attaching the burner to the flue has a clean chassis earth contact[cite: 1, 2].
+- Red Switch Permanently Lit (No Spark / No Ticking): The module falsely detects a flame[cite: 2]. This is caused by moisture or carbon tracking on the ceramic insulator of the spark electrode or inside the module casing, creating a direct short to earth[cite: 1, 2]. Manually light the burner with a match/lighter and run for 1–2 hours to dry out the ceramic insulator[cite: 1, 2]. If unplugging the thin HT lead directly from the module causes it to immediately begin ticking and flashing, the short is downstream in the lead or electrode insulator[cite: 1, 2].
+- Switch Removal (The Forceps Trick): Prise the switch forward gently from the fascia[cite: 1, 2]. Wiring slack behind the panel is minimal; clamp locking forceps onto the individual wires behind the switch body as it emerges so the spade terminals cannot pull off and drop behind the cabinet insulation[cite: 2].
+
+
+3. BURNER, JET & GAS LINE SERVICING
+
+If the igniter produces a strong, continuous spark but the burner fails to catch, or burns with a weak, silent, candle-like yellow flame, the gas delivery path is choked[cite: 1, 2].
+
+Standard Flame Benchmarks:
+- 50 mbar Supply: A healthy flame measures 50 mm to 60 mm (5.5 to 6 cm) in total height, displaying a sharp, pale blue outer cone with a concentrated cobalt blue inner core, accompanied by a distinct, gentle roaring sound[cite: 2].
+- Defective Flame: A flame that is under 30 mm, floppy, orange/yellow, silent, or easily blown out indicates restricted primary air or a blocked jet[cite: 1, 2].
+
+Quick Clean First (Before Disassembly):
+Before undertaking any mechanical disassembly, try blasting compressed air all around the burner assembly and burner crown[cite: 1, 2]. This simple action is often all that is needed to blow away loose soot or dust obstructing the jet orifice, and many a breakdown has been fixed this way out on the road[cite: 1, 2]. It is well worth finding a garage or tyre inflator with compressed air before getting the spanners out[cite: 1, 2].
+
+If compressed air is unavailable, giving the burner body a sharp, gentle tap with a metallic tool (or using a bicycle pump) can also dislodge debris and get the flame roaring again[cite: 1, 2]. 
+
+Note: If either of these quick fixes gets the fridge working, take it as an early warning that a full, methodical burner strip and clean will be required in the near future[cite: 1, 2].
+
+Step-by-Step Servicing Procedure:
+1. Expose the Burner: Remove the lower exterior fridge vent cover[cite: 1, 2]. Remove the two screws securing the sheet-metal burner draft shield box to expose the burner assembly[cite: 1, 2].
+
+2. Dismantle the Gas Connection (High-Risk Step):
+   - Turn off the gas bottle supply[cite: 2].
+   - On a 30-year-old corroded burner, separating the gas feed pipe from the burner body is a delicate operation[cite: 1, 2]. The union nut frequently seizes solid[cite: 1, 2].
+   - Do not use brute force or an ill-fitting spanner[cite: 2]. Rounding off the brass nut will ruin the entire feed pipe assembly, which is a rare combination spare part and exceptionally difficult to source or replace[cite: 2].
+   - If it does not loosen with moderate force, stop immediately[cite: 2]. Apply a good quality penetrating / easing oil (e.g. PlusGas or Kroil) and allow it to soak overnight[cite: 2].
+   - When attempting to crack the union, the square burner body must be counter-held firmly using an exact-fit open-ended spanner (not loose grips or adjustable wrenches)[cite: 1, 2]. Apply steady, opposed counter-torque with a second spanner on the nut[cite: 1, 2]. Never allow the thin copper or steel gas pipe to twist or shear[cite: 1, 2].
+   - Undo the single screw securing the burner bracket to the bottom of the flue chimney tube[cite: 1, 2].
+
+3. Inspect and Clean the Jet (Thimble Orifice):
+   - The jet sits inside the mouth of the burner body where the gas pipe enters[cite: 1, 2]. It is a delicate brass or ruby thimble cup[cite: 1, 2].
+   - Critical Rule: Never use a needle, pin, drill, or wire to clear the jet[cite: 1, 2]. Altering the laser-drilled orifice diameter by a fraction of a millimetre ruins the stoichiometric air-fuel mix and creates an extreme carbon monoxide hazard[cite: 1, 2].
+   - Soak the jet in isopropyl alcohol, electrical contact cleaner, or brake cleaner, then blow through with clean compressed air[cite: 1, 2].
+   - Check clearance by holding the jet up to the sky; you should observe a sharp, distinct pinprick of daylight through the centre[cite: 2].
+   - 50 mbar Part Reference: Pre-1995 classic Hymers require a 50 mbar jet stamped "KZ12" (or "12") on the side (Dometic Part No. 292203307 / 2922033077, available from specialists like Swordcrown Caravans)[cite: 1, 2]. Never fit a 30/37 mbar jet (KZ16/KZ43) to a 50 mbar installation[cite: 1, 2].
+
+4. Clear Internal Gas Pipe Scale (The Drill Scraper Trick):
+   - Fitting a clean jet often fails because flaky rust scale inside the horizontal supply pipe is pushed down into the jet the moment gas flows[cite: 2].
+   - Cut a 40 cm length of multi-strand automotive electrical flex[cite: 2]. Strip 10 mm of outer insulation and slightly splay the copper strands[cite: 2].
+   - Insert the splayed end into the open gas supply pipe, chuck the other end into a battery drill, and gently push and pull while running the drill to de-scale the internal pipe walls[cite: 2].
+   - The Purge: With the burner removed, have an assistant press the gas control knob inside the van for 4–5 seconds to blow the dislodged scale out of the open pipe end before refitting the jet[cite: 2].
+
+5. De-scale Burner Body & Venturi Ports:
+   - Run a 3/16 inch (4.5–5 mm) drill bit manually through the side air intake holes and down the Venturi tube to dislodge spider webs, rust flakes, and carbon deposits[cite: 2].
+   - Invert the burner body and tap it firmly against a hard timber surface to shake loose scale out of the burner crown ring slots[cite: 1, 2].
+
+6. Reassembly & Soundness Check:
+   - Ensure the square locating shoulders of the ceramic electrode and thermocouple seat fully into the stamped recesses of the triangular clamping plate[cite: 1, 2].
+   - Reconnect the gas compression nut, inspecting the brass olive for cracking or distortion[cite: 2].
+   - Apply soapy water or leak detection fluid across the union joint with the gas turned on and the knob depressed to verify zero leakage[cite: 1, 2].
+
+
+4. FLUE CHIMNEY, BAFFLE (HELIX) & THERMOCOUPLE
+
+The Spiral Flue Baffle (Helix) Drop:
+Suspended inside the vertical chimney tube above the burner is a twisted metal spiral baffle (helix)[cite: 1, 2]. It slows rising exhaust gases and forces heat into the absorption boiler tube[cite: 1, 2].
+- The Failure: Over decades of thermal cycling, the thin suspension wire holding the baffle corrodes through and breaks[cite: 2]. The spiral baffle drops down the tube until it rests directly on top of the burner crown[cite: 2].
+- Symptoms: The flame lights but cooling efficiency on gas drops drastically, and heavy soot collects around the burner box[cite: 2].
+- Extraction & Flue Sweeping:
+  * Remove the exterior wall flue grille and slide the diagonal exhaust T-pipe off the central chimney[cite: 2].
+  * Look down into the open top of the chimney tube[cite: 2]. If the support hook is missing from the top slot, the baffle has dropped[cite: 2].
+  * Fish the baffle out from the top using a wire hook[cite: 2]. Do not pull it down past the lower burner bracket, or the spiral will deform[cite: 2].
+  * Sweep the internal chimney tube using a stiff wire or long bottle brush to dislodge soot and rust flakes, catching the debris at the bottom before refitting the burner[cite: 1, 2].
+- Fabricating a Replacement Wire: Do not use soft copper or standard garden wire[cite: 2]. Fabricate a new hanging wire using 1.6 mm or 2.0 mm stainless steel welding rod (TIG/gas wire), forming a hooked top to engage the rim slot and an eyelet at the bottom to secure the baffle[cite: 2].
+
+Thermocouple Function & Low-Cost Universal Replacements:
+If the burner ignites and produces a strong blue flame while the control knob is held in, but dies the instant the knob is released after 10–20 seconds, the thermocouple or safety magnet valve has failed[cite: 1, 2].
+- Operating Principle: The thermocouple is an active thermoelectric generator (not a fluid expansion capillary)[cite: 2]. The heated dissimilar-metal tip generates a tiny DC voltage (EMF, millivolts) carried through the centre wire (+ve) and outer copper sheath (-ve) to hold the gas valve safety solenoid open[cite: 2].
+- Universal Replacements: OEM Dometic thermocouples often cost £40–£70[cite: 2]. Standard generic Universal Thermocouple Kits (1400 mm to 1500 mm length) available from plumbing suppliers (such as BES) or eBay for under £10 are fully compatible[cite: 2]:
+  * The probe tip matches the standard burner clamp bracket[cite: 2].
+  * The included threaded brass collar adaptors screw directly into the safety valve receiver on the back of the front control knob[cite: 2].
+  * Gently curve any excess capillary sheath out of the way behind the unit without creating sharp kinks[cite: 2].
+
+
+5. BENCH TESTING & OPERATIONAL BENCHMARKS
+
+For rear-corner kitchen layouts (such as the B544 or B564) where chassis body panels or internal cabinetry block access to the lower burner box, the fridge must be extracted into the living space or workshop bench for servicing[cite: 1, 2].
+
+Target Cooling Temperatures:
+When testing on a workbench (running on 230 V or an isolated 50 mbar gas bottle):
+- Internal Evaporator Fins: Must reach +5 °C or lower within 6 to 8 hours[cite: 2].
+- Freezer / Ice Compartment: Must reach -5 °C to -10 °C (capable of freezing water overnight)[cite: 2].
+- Verify temperatures using a direct contact probe or infrared laser thermometer aimed at the internal aluminium heat-sink fins[cite: 2].
+
+Physical Level & Chemical Separation Myth:
+- Operating Tilt Tolerance: Modern and classic Dometic units operate reliably within a ±5° tilt[cite: 1, 2]. If the vehicle is parked at an angle comfortable enough to stand and sleep in, tilt is not the cause of gas failure[cite: 1, 2].
+- Chemical Separation: If the fridge fails to cool on 230 V, 12 V, and gas simultaneously (despite heat rising from the flue), the sodium chromate and ammonia mix inside the sealed circuit may have separated[cite: 1, 2]. Driving over a rough, cobbled road or running the unit on a workbench can remix the solution[cite: 2]. Do not rotate or turn an absorption fridge upside down unless specifically diagnosing total system crystallisation under controlled conditions[cite: 1, 2].
