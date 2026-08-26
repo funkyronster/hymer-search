@@ -44,6 +44,100 @@
     let fuse = null;
     let searchDebounceTimer = null;
 
+    const searchBox = document.getElementById('searchBox');
+    const resultsContainer = document.getElementById('results');
+    const resultCount = document.getElementById('resultCount');
+
+    function getLinkMeta(url) {
+      const lower = url.toLowerCase();
+      if (lower.includes('facebook.com') || lower.includes('fb.com')) {
+        return { label: '👉 Open Facebook Post', cssClass: '' };
+      } else if (lower.includes('youtube.com') || lower.includes('youtu.be')) {
+        return { label: '▶️ Open YouTube Video', cssClass: 'youtube' };
+      } else {
+        try {
+          const parsed = new URL(url);
+          const hostname = parsed.hostname.replace(/^www\./, '');
+          return { label: `🌐 Open Website (${hostname})`, cssClass: 'external' };
+        } catch (e) {
+          return { label: '🌐 Open External Link', cssClass: 'external' };
+        }
+      }
+    }
+
+    function logSearchToAnalytics(query) {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({
+          path: '/search?q=' + encodeURIComponent(query),
+          title: 'Search: ' + query,
+          event: true
+        });
+      }
+    }
+
+    function runSearch(inputQuery) {
+      const rawQuery = inputQuery.trim().toLowerCase().replace(/roof light/g, 'rooflight');
+
+      if (!rawQuery) {
+        resultsContainer.innerHTML = '';
+        resultCount.textContent = '';
+        return;
+      }
+
+      const tokens = rawQuery.split(/\s+/).filter(t => t.length >= 2);
+      if (tokens.length === 0) {
+        resultsContainer.innerHTML = '';
+        resultCount.textContent = '';
+        return;
+      }
+
+      // 1. Strict All-Token Match
+      const strictMatches = archiveData.filter(item =>
+        tokens.every(token => item.searchIndex.includes(token))
+      );
+
+      let matches = [];
+
+      if (strictMatches.length > 0) {
+        matches = strictMatches;
+      } else {
+        // 2. Ranked Partial Token Match
+        const scored = [];
+        archiveData.forEach(item => {
+          let score = 0;
+          tokens.forEach(token => {
+            if (item.searchIndex.includes(token)) {
+              score += token.length;
+            }
+          });
+          if (score > 0) {
+            scored.push({ item: item, score: score });
+          }
+        });
+
+        if (scored.length > 0) {
+          scored.sort((a, b) => b.score - a.score);
+          matches = scored.map(s => s.item);
+        } else if (fuse) {
+          // 3. Fuzzy Fallback
+          matches = fuse.search(rawQuery).map(res => res.item);
+        }
+      }
+
+      resultCount.textContent = `Found ${matches.length} result(s)`;
+      resultsContainer.innerHTML = matches.map(item => {
+        const meta = getLinkMeta(item.url);
+        return `
+          <div class="item">
+            <div class="item-title">${item.title}</div>
+            <div class="link-wrapper">
+              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     fetch('master_archive.txt')
       .then(r => r.text())
       .then(text => {
@@ -78,110 +172,30 @@
           keys: ['title', 'searchIndex'],
           threshold: 0.35,
           ignoreLocation: true,
-          minMatchCharLength: 3
+          minMatchCharLength: 2
         });
+
+        // Check if URL has a search parameter (e.g. ?q=fridge or ?search=circuit+diag)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlQuery = urlParams.get('q') || urlParams.get('search');
+        if (urlQuery) {
+          searchBox.value = urlQuery;
+          runSearch(urlQuery);
+          logSearchToAnalytics(urlQuery.toLowerCase());
+        }
       });
 
-    const searchBox = document.getElementById('searchBox');
-    const resultsContainer = document.getElementById('results');
-    const resultCount = document.getElementById('resultCount');
-
-    function getLinkMeta(url) {
-      const lower = url.toLowerCase();
-      if (lower.includes('facebook.com') || lower.includes('fb.com')) {
-        return { label: '👉 Open Facebook Post', cssClass: '' };
-      } else if (lower.includes('youtube.com') || lower.includes('youtu.be')) {
-        return { label: '▶️ Open YouTube Video', cssClass: 'youtube' };
-      } else {
-        try {
-          const parsed = new URL(url);
-          const hostname = parsed.hostname.replace(/^www\./, '');
-          return { label: `🌐 Open Website (${hostname})`, cssClass: 'external' };
-        } catch (e) {
-          return { label: '🌐 Open External Link', cssClass: 'external' };
-        }
-      }
-    }
-
-    function logSearchToAnalytics(query) {
-      if (window.goatcounter && window.goatcounter.count) {
-        window.goatcounter.count({
-          path: '/search?q=' + encodeURIComponent(query),
-          title: 'Search: ' + query,
-          event: true
-        });
-      }
-    }
-
     searchBox.addEventListener('input', () => {
-      const rawQuery = searchBox.value.trim().toLowerCase().replace(/roof light/g, 'rooflight');
+      const val = searchBox.value;
       
       clearTimeout(searchDebounceTimer);
-      if (rawQuery.length >= 2) {
+      if (val.trim().length >= 2) {
         searchDebounceTimer = setTimeout(() => {
-          logSearchToAnalytics(rawQuery);
+          logSearchToAnalytics(val.trim().toLowerCase());
         }, 800);
       }
 
-      if (!rawQuery) {
-        resultsContainer.innerHTML = '';
-        resultCount.textContent = '';
-        return;
-      }
-
-      // Ignore single character tokens that match everything indiscriminately
-      const tokens = rawQuery.split(/\s+/).filter(t => t.length >= 2);
-      if (tokens.length === 0) {
-        resultsContainer.innerHTML = '';
-        resultCount.textContent = '';
-        return;
-      }
-
-      // 1. Try strict match first: find items containing ALL typed tokens
-      const strictMatches = archiveData.filter(item =>
-        tokens.every(token => item.searchIndex.includes(token))
-      );
-
-      let matches = [];
-
-      if (strictMatches.length > 0) {
-        matches = strictMatches;
-      } else {
-        // 2. Ranked Partial Match: count how many tokens match, prioritize highest
-        const scored = [];
-        archiveData.forEach(item => {
-          let score = 0;
-          tokens.forEach(token => {
-            if (item.searchIndex.includes(token)) {
-              score += token.length; // Weigh longer word matches higher (e.g. 'circuit' over 's5')
-            }
-          });
-          if (score > 0) {
-            scored.push({ item: item, score: score });
-          }
-        });
-
-        if (scored.length > 0) {
-          scored.sort((a, b) => b.score - a.score);
-          matches = scored.map(s => s.item);
-        } else if (fuse) {
-          // 3. Fallback to Fuse.js for typo tolerance
-          matches = fuse.search(rawQuery).map(res => res.item);
-        }
-      }
-
-      resultCount.textContent = `Found ${matches.length} result(s)`;
-      resultsContainer.innerHTML = matches.map(item => {
-        const meta = getLinkMeta(item.url);
-        return `
-          <div class="item">
-            <div class="item-title">${item.title}</div>
-            <div class="link-wrapper">
-              <a class="item-link ${meta.cssClass}" href="${item.url}" target="_blank" rel="noopener noreferrer">${meta.label}</a>
-            </div>
-          </div>
-        `;
-      }).join('');
+      runSearch(val);
     });
   </script>
 </body>
