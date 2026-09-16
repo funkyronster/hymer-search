@@ -17,15 +17,6 @@
     h1 { font-size: 1.35rem; margin-bottom: 8px; color: #111; }
     .intro { font-size: 0.92rem; color: #444; margin-bottom: 16px; line-height: 1.45; }
     #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 12px; background: #fff; }
-    
-    /* FB Copy Panel */
-    #fbPanel { display: none; margin-bottom: 16px; background: #f0f4f8; border: 1px solid #cce0ff; border-radius: 8px; padding: 10px 12px; }
-    .fb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .fb-header span { font-size: 0.85rem; font-weight: 600; color: #004499; }
-    .copy-btn { background: #0066cc; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-    .copy-btn:active { background: #004d99; }
-    #fbText { width: 100%; box-sizing: border-box; height: 110px; font-family: monospace; font-size: 0.82rem; padding: 8px; border: 1px solid #b3d1ff; border-radius: 6px; background: #fff; resize: vertical; }
-
     .result-count { font-size: 0.85rem; font-weight: bold; color: #444; margin-bottom: 12px; }
     .item { padding: 12px 0; border-bottom: 1px solid #e2e2e2; }
     .item-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; color: #111; }
@@ -34,6 +25,14 @@
     .item-link.youtube { background-color: #cc0000; }
     .item-link.external { background-color: #2b7a4b; }
     .item-link:active { opacity: 0.85; }
+
+    /* Admin Panel at Bottom */
+    #fbPanel { display: none; margin-top: 30px; margin-bottom: 20px; background: #f4f5f7; border: 1px solid #d2d6dc; border-radius: 8px; padding: 12px 14px; }
+    .fb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .fb-header span { font-size: 0.78rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .copy-btn { background: #4a5568; color: #fff; border: none; border-radius: 4px; padding: 5px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .copy-btn:active { background: #2d3748; }
+    #fbText { width: 100%; box-sizing: border-box; height: 200px; font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.76rem; line-height: 1.35; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; background: #fff; resize: vertical; color: #333; }
   </style>
 </head>
 <body>
@@ -45,17 +44,17 @@
 
   <input type="text" id="searchBox" placeholder="Type search term (e.g. rooflight, fridge, 12V)..." autofocus>
   
-  <!-- Batch Copy Block for Facebook Replies -->
+  <div id="resultCount" class="result-count"></div>
+  <div id="results"></div>
+
+  <!-- Admin Batch Copy Block -->
   <div id="fbPanel">
     <div class="fb-header">
-      <span>Batch Copy for Facebook</span>
-      <button id="copyAllBtn" class="copy-btn">📋 Copy All for FB</button>
+      <span>Admin Use Only — Batch Copy for Facebook</span>
+      <button id="copyAllBtn" class="copy-btn">📋 Copy All</button>
     </div>
     <textarea id="fbText" placeholder="Matching entries will appear here..."></textarea>
   </div>
-
-  <div id="resultCount" class="result-count"></div>
-  <div id="results"></div>
 
   <script>
     let archiveData = [];
@@ -172,7 +171,6 @@
       }).join('');
     }
 
-    // 1-Click Copy All Button
     copyAllBtn.addEventListener('click', () => {
       if (!fbText.value.trim()) return;
       navigator.clipboard.writeText(fbText.value).then(() => {
