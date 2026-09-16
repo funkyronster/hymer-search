@@ -16,7 +16,16 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px 15px; color: #222; line-height: 1.4; background-color: #fcfcfc; }
     h1 { font-size: 1.35rem; margin-bottom: 8px; color: #111; }
     .intro { font-size: 0.92rem; color: #444; margin-bottom: 16px; line-height: 1.45; }
-    #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 15px; background: #fff; }
+    #searchBox { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 2px solid #0066cc; border-radius: 8px; outline: none; margin-bottom: 12px; background: #fff; }
+    
+    /* FB Copy Panel */
+    #fbPanel { display: none; margin-bottom: 16px; background: #f0f4f8; border: 1px solid #cce0ff; border-radius: 8px; padding: 10px 12px; }
+    .fb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .fb-header span { font-size: 0.85rem; font-weight: 600; color: #004499; }
+    .copy-btn { background: #0066cc; color: #fff; border: none; border-radius: 5px; padding: 6px 12px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .copy-btn:active { background: #004d99; }
+    #fbText { width: 100%; box-sizing: border-box; height: 110px; font-family: monospace; font-size: 0.82rem; padding: 8px; border: 1px solid #b3d1ff; border-radius: 6px; background: #fff; resize: vertical; }
+
     .result-count { font-size: 0.85rem; font-weight: bold; color: #444; margin-bottom: 12px; }
     .item { padding: 12px 0; border-bottom: 1px solid #e2e2e2; }
     .item-title { font-weight: 600; font-size: 1rem; margin-bottom: 6px; color: #111; }
@@ -36,6 +45,15 @@
 
   <input type="text" id="searchBox" placeholder="Type search term (e.g. rooflight, fridge, 12V)..." autofocus>
   
+  <!-- Batch Copy Block for Facebook Replies -->
+  <div id="fbPanel">
+    <div class="fb-header">
+      <span>Batch Copy for Facebook</span>
+      <button id="copyAllBtn" class="copy-btn">📋 Copy All for FB</button>
+    </div>
+    <textarea id="fbText" placeholder="Matching entries will appear here..."></textarea>
+  </div>
+
   <div id="resultCount" class="result-count"></div>
   <div id="results"></div>
 
@@ -47,6 +65,9 @@
     const searchBox = document.getElementById('searchBox');
     const resultsContainer = document.getElementById('results');
     const resultCount = document.getElementById('resultCount');
+    const fbPanel = document.getElementById('fbPanel');
+    const fbText = document.getElementById('fbText');
+    const copyAllBtn = document.getElementById('copyAllBtn');
 
     function getLinkMeta(url) {
       const lower = url.toLowerCase();
@@ -81,6 +102,8 @@
       if (!rawQuery) {
         resultsContainer.innerHTML = '';
         resultCount.textContent = '';
+        fbPanel.style.display = 'none';
+        fbText.value = '';
         return;
       }
 
@@ -88,6 +111,8 @@
       if (tokens.length === 0) {
         resultsContainer.innerHTML = '';
         resultCount.textContent = '';
+        fbPanel.style.display = 'none';
+        fbText.value = '';
         return;
       }
 
@@ -125,6 +150,15 @@
       }
 
       resultCount.textContent = `Found ${matches.length} result(s)`;
+
+      if (matches.length > 0) {
+        fbPanel.style.display = 'block';
+        fbText.value = matches.map(item => `${item.title}\n${item.url}`).join('\n\n');
+      } else {
+        fbPanel.style.display = 'none';
+        fbText.value = '';
+      }
+
       resultsContainer.innerHTML = matches.map(item => {
         const meta = getLinkMeta(item.url);
         return `
@@ -137,6 +171,18 @@
         `;
       }).join('');
     }
+
+    // 1-Click Copy All Button
+    copyAllBtn.addEventListener('click', () => {
+      if (!fbText.value.trim()) return;
+      navigator.clipboard.writeText(fbText.value).then(() => {
+        const originalText = copyAllBtn.textContent;
+        copyAllBtn.textContent = '✓ Copied!';
+        setTimeout(() => {
+          copyAllBtn.textContent = originalText;
+        }, 1500);
+      });
+    });
 
     fetch('master_archive.txt')
       .then(r => r.text())
@@ -175,7 +221,6 @@
           minMatchCharLength: 2
         });
 
-        // Check if URL has a search parameter (e.g. ?q=fridge or ?search=circuit+diag)
         const urlParams = new URLSearchParams(window.location.search);
         const urlQuery = urlParams.get('q') || urlParams.get('search');
         if (urlQuery) {
